@@ -14,13 +14,22 @@
                  [ch.qos.logback/logback-classic "1.2.3"]
                  [org.clojure/tools.logging "0.5.0"]
 
+                 ;; Network related
+                 [clj-http "3.10.0"]
+                 [cheshire "5.9.0"]
+
                  ]
   :main ahungry.gui
   :repl-options {:init-ns ahungry.gui}
   :java-source-paths ["java-src"]
   :aot [ahungry.gui]
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}}
+  :profiles
+  {
+   ;; Required to use clojure spec check facilities.
+   :dev {:dependencies [[org.clojure/test.check "0.9.0"]]}
+   :uberjar {:aot :all}
+   }
   :jvm-opts ["-Dfile.encoding=UTF8"
              "-Dswing.aatext=true"
              "-Dawt.useSystemAAFontSettings=lcd"

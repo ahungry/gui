@@ -1,6 +1,8 @@
 (ns ahungry.gui
   (:require
-   [clojure.tools.logging :as log])
+   [clojure.tools.logging :as log]
+   [ahungry.net :as net]
+   )
   (:use [seesaw.core])
   (:import org.pushingpixels.substance.api.SubstanceCortex$GlobalScope)
   (:gen-class))
@@ -10,7 +12,6 @@
 (log/debug "Boot")
 
 (defn laf-selector []
-  (prn SubstanceCortex$GlobalScope)
   (horizontal-panel
    :items ["Substance skin: "
            (combobox
