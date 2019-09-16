@@ -97,12 +97,23 @@
             (line-to -20 0) (line-to -5 5)
             (line-to 0 20)))
 
+(def grow (atom {:x 0 :y 0 :f inc}))
+
+(defn get-grow []
+  (let [{:keys [x y f]} @grow]
+    (when (> x 300)
+      (swap! grow assoc-in [:f] dec))
+    (when (< x 1)
+      (swap! grow assoc-in [:f] inc))
+    (swap! grow conj {:x (f x) :y (f y)})
+    @grow))
+
 (defn paint2 [c g]
-  (let [
+  (let [grow (get-grow)
         ;; w (.getWidth c)  w2 (/ w 2)
         ;; h (.getHeight c) h2 (/ h 2)
-        w2 (rand-int 200)
-        h2 (rand-int 200)
+        w2 (:x grow)
+        h2 (:y grow)
         ]
     (ssg/draw g
               (ssg/ellipse 0  0  w2 h2) (ssg/style :background (ssc/color 224 224 0 128))
