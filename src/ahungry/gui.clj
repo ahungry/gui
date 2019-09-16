@@ -112,6 +112,12 @@ skins along with much less crappy looking demos.")
           :background "#BBBBDD"
           :paint paint1))
 
+;; We can do a dynamic or REPL based flow with config!
+;; (def x (make-canvas-panel))
+;; (show x)
+;; (config! x :paint 1)
+;; (config! x :paint 2)
+
 (defn show
   "REPL friendly way to pop up what we're working on."
   [f]
