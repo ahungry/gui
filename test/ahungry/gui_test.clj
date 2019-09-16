@@ -1,7 +1,13 @@
 (ns ahungry.gui-test
-  (:require [clojure.test :refer :all]
-            [ahungry.gui :refer :all]))
+  (:require
+   [clojure.test :refer :all]
+   [clojure.tools.logging :as log]
+   [ahungry.gui :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest log-test
+  (testing "The log call works and returns nil."
+    (is (= nil (log/debug "Greetings from the test suite.
+The file that controls log output is in:
+  ./src/logback.xml
+
+You can edit the verbosity level in there.")))))
