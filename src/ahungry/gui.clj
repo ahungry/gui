@@ -3,7 +3,11 @@
    [clojure.tools.logging :as log]
    [ahungry.net :as net]
    )
-  (:use [seesaw.core])
+  (:use
+   [seesaw.core]
+   [seesaw.graphics]
+   [seesaw.color]
+   )
   (:import org.pushingpixels.substance.api.SubstanceCortex$GlobalScope)
   (:gen-class))
 
@@ -47,14 +51,96 @@ See http://insubstantial.github.com/insubstantial/substance/docs/getting-started
 for more info. There you'll also find much more info about the
 skins along with much less crappy looking demos.")
 
+;; BEGIN paint sample from canvas.clj in seesaw repo
+(defn paint1 [c g]
+  (let [w (.getWidth c)
+        h (.getHeight c)]
+    (doto g
+      (draw (polygon [0 h] [(/ w 4) 0] [(/ w 2) (/ h 2)] [w (/ h 2)] [0 h])
+                     (style :foreground java.awt.Color/BLACK
+                       :background (color 128 128 128 128)
+                       :stroke     (stroke :width 4)))
+      (.setColor (color 224 224 0 128))
+      (.fillRect 0 0 (/ w 2) (/ h 2))
+      (.setColor (color 0 224 224 128))
+      (.fillRect 0 (/ h 2) (/ w 2) (/ h 2))
+      (.setColor (color 224 0 224 128))
+      (.fillRect (/ w 2) 0 (/ w 2) (/ h 2))
+      (.setColor (color 224 0 0 128))
+      (.fillRect (/ w 2) (/ h 2) (/ w 2) (/ h 2))
+      (.setColor (color 0 0 0))
+      (.drawString "Hello. This is a canvas example" 20 20))))
+
+(def text-style (style :foreground (color 0 0 0)
+                       :font "ARIAL-BOLD-24"))
+
+(def star
+  (path []
+    (move-to 0 20) (line-to 5 5)
+    (line-to 20 0) (line-to 5 -5)
+    (line-to 0 -20) (line-to -5 -5)
+    (line-to -20 0) (line-to -5 5)
+    (line-to 0 20)))
+
+(defn paint2 [c g]
+  (let [w (.getWidth c)  w2 (/ w 2)
+        h (.getHeight c) h2 (/ h 2)]
+    (draw g
+      (ellipse 0  0  w2 h2) (style :background (color 224 224 0 128))
+      (ellipse 0  h2 w2 h2) (style :background (color 0 224 224 128))
+      (ellipse w2 0  w2 h2) (style :background (color 224 0 224 128))
+      (ellipse w2 h2 w2 h2) (style :background (color 224 0 0 128)))
+    (push g
+      (rotate g 20)
+      (draw g (string-shape 20 20  "Hello. This is a canvas example") text-style))
+    (push g
+      (translate g w2 h2)
+      (draw g star (style :foreground java.awt.Color/BLACK :background java.awt.Color/YELLOW)))))
+
+; Create an action that swaps the paint handler for the canvas.
+; Note that we can use (config!) to set the :paint handler just like
+; properties on other widgets.
+(defn switch-paint-action [n paint]
+  (action :name n
+          :handler #(-> (to-frame %)
+                      (select [:#canvas])
+                      (config! :paint paint))))
+;; END paint sample from canvas.clj in seesaw repo
+
+(defn make-canvas-panel []
+  (canvas :id :canvas
+          :background "#BBBBDD"
+          :paint paint1))
+
+(defn show
+  "REPL friendly way to pop up what we're working on."
+  [f]
+  (invoke-later
+   (->
+    (frame
+     :title "Widget"
+     :content f)
+    pack!
+    show!)))
+
 (defn -main [& args]
   (invoke-later
    (->
     (frame
      :title "Seesaw Substance/Insubstantial Example"
      :on-close :exit
-     :content (vertical-panel
-               :items [(laf-selector)
+     :content
+     (border-panel
+      :hgap 5 :vgap 5 :border 5
+      :center (vertical-panel
+               :items [(vertical-panel
+                        :items [(canvas :id :canvas :background "#BBBBDD" :paint nil)])
+                       (horizontal-panel :items ["Switch canvas paint function: "
+                                                 (switch-paint-action "None" nil)
+                                                 (switch-paint-action "Rectangles" paint1)
+                                                 (switch-paint-action "Ovals" paint2)])
+                       :separator
+                       (laf-selector)
                        (text :multi-line? true :text notes :border 5)
                        :separator
                        (label :text "A Label")
@@ -65,7 +151,8 @@ skins along with much less crappy looking demos.")
                         :border "Some radio buttons"
                         :items (map (partial radio :text)
                                     ["First" "Second" "Third"]))
-                       (scrollable (listbox :model (range 100)))]))
+                       (scrollable (listbox :model (range 100)))])
+      ))
     pack!
     show!)
    (SubstanceCortex$GlobalScope/setSkin "org.pushingpixels.substance.api.skin.DustSkin")
