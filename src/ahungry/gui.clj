@@ -108,15 +108,24 @@ skins along with much less crappy looking demos.")
 ;; END paint sample from canvas.clj in seesaw repo
 
 (defn make-canvas-panel []
-  (canvas :id :canvas
+  (canvas :id :canvas1
           :background "#BBBBDD"
           :paint paint1))
+
+(defn make-canvas-panel2 []
+  (canvas :id :canvas2
+          :background "#BBBBDD"
+          :paint paint2))
 
 ;; We can do a dynamic or REPL based flow with config!
 ;; (def x (make-canvas-panel))
 ;; (show x)
 ;; (config! x :paint 1)
 ;; (config! x :paint 2)
+
+(defn make-tabbed-pane []
+  (tabbed-panel :tabs [{:title "One" :content (make-canvas-panel)}
+                       {:title "Two" :content (make-canvas-panel2)}]))
 
 (defn show
   "REPL friendly way to pop up what we're working on."
@@ -129,6 +138,44 @@ skins along with much less crappy looking demos.")
     pack!
     show!)))
 
+(defn make-switchable-canvas []
+  (vertical-panel
+   :items
+   [(canvas :id :canvas :background "#BBBBDD" :paint paint1)
+    (horizontal-panel :items ["Switch canvas paint function: "
+                              (switch-paint-action "None" nil)
+                              (switch-paint-action "Rectangles" paint1)
+                              (switch-paint-action "Ovals" paint2)])]))
+
+(defn make-laf-stuff []
+  (border-panel
+   :hgap 5 :vgap 5 :border 5
+   :center (vertical-panel
+            :items [
+                    :separator
+                    (laf-selector)
+                    (text :multi-line? true :text notes :border 5)
+                    :separator
+                    (label :text "A Label")
+                    (button :text "A Button")
+                    (checkbox :text "A checkbox")
+                    (combobox :model ["A combobox" "more" "items"])
+                    (horizontal-panel
+                     :border "Some radio buttons"
+                     :items (map (partial radio :text)
+                                 ["First" "Second" "Third"]))
+                    (scrollable (listbox :model (range 100)))])))
+
+(defn make-main-panel []
+  (tabbed-panel
+   :tabs
+   [
+    {:title "Look and Feel" :content (make-laf-stuff)}
+    {:title "Switchable Canvas" :content (make-switchable-canvas)}
+    {:title "Paint1" :content (make-canvas-panel)}
+    {:title "Paint2" :content (make-canvas-panel2)}
+    ]))
+
 (defn -main [& args]
   (invoke-later
    (->
@@ -136,30 +183,11 @@ skins along with much less crappy looking demos.")
      :title "Seesaw Substance/Insubstantial Example"
      :on-close :exit
      :content
-     (border-panel
-      :hgap 5 :vgap 5 :border 5
-      :center (vertical-panel
-               :items [(vertical-panel
-                        :items [(canvas :id :canvas :background "#BBBBDD" :paint nil)])
-                       (horizontal-panel :items ["Switch canvas paint function: "
-                                                 (switch-paint-action "None" nil)
-                                                 (switch-paint-action "Rectangles" paint1)
-                                                 (switch-paint-action "Ovals" paint2)])
-                       :separator
-                       (laf-selector)
-                       (text :multi-line? true :text notes :border 5)
-                       :separator
-                       (label :text "A Label")
-                       (button :text "A Button")
-                       (checkbox :text "A checkbox")
-                       (combobox :model ["A combobox" "more" "items"])
-                       (horizontal-panel
-                        :border "Some radio buttons"
-                        :items (map (partial radio :text)
-                                    ["First" "Second" "Third"]))
-                       (scrollable (listbox :model (range 100)))])
-      ))
+     (make-main-panel)
+     )
     pack!
     show!)
    (SubstanceCortex$GlobalScope/setSkin "org.pushingpixels.substance.api.skin.DustSkin")
    ))
+
+(log/debug "Fin")
