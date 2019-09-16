@@ -1,4 +1,4 @@
-all: run
+all: build
 
 test:
 	lein test
@@ -14,4 +14,12 @@ target/uberjar/gui-1.0.0-SNAPSHOT-standalone.jar:
 	lein deps
 	lein uberjar
 
-.PHONY: test
+build:
+	lein uberjar
+
+uberjar: build
+
+help:
+	$(info Hint: Run something like - make build && make test && make run)
+
+.PHONY: uberjar build test help
