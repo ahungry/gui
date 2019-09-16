@@ -3,7 +3,9 @@
    [clojure.test :refer :all]
    [clojure.tools.logging :as log]
    [ahungry.net :as net]
-   [ahungry.gui :refer :all]))
+   [ahungry.gui :refer :all]
+   [xdg-rc.core :as xdg-rc]
+   ))
 
 (deftest log-test
   (testing "The log call works and returns nil."
@@ -20,3 +22,10 @@ You can edit the verbosity level in there.")))))
       (println "Your IP was: ")
       (prn res)
       (is (= java.lang.String (type (:origin res)))))))
+
+(deftest config-test
+  (testing "That we can use this tool for this."
+    (let [res (xdg-rc/get-xdg-config-home)]
+      (println "Your home directory was...:")
+      (prn res)
+      (is (= java.lang.String (type res))))))

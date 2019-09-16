@@ -18,6 +18,9 @@
                  [clj-http "3.10.0"]
                  [cheshire "5.9.0"]
 
+                 ;; Config or persistence related
+                 [ahungry/xdg-rc "0.0.4"]
+
                  ]
   :main ahungry.gui
   :repl-options {:init-ns ahungry.gui}
