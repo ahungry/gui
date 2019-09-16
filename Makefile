@@ -1,3 +1,5 @@
+default: help
+
 all: build
 
 test:
@@ -19,7 +21,11 @@ build:
 
 uberjar: build
 
+list-deps:
+	lein deps :tree
+
 help:
 	$(info Hint: Run something like - make build && make test && make run)
+	$(info Available commands: [ all | test | run | build | list-deps | help ])
 
-.PHONY: uberjar build test help
+.PHONY: uberjar build test help list-deps
