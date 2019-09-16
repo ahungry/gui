@@ -221,6 +221,8 @@ skins along with much less crappy looking demos.")
    (->
     (frame
      :title "Seesaw Substance/Insubstantial Example"
+     :minimum-size [640 :by 480]
+     :menubar (make-menu)
      :on-close :exit
      :content
      (make-main)
@@ -228,7 +230,7 @@ skins along with much less crappy looking demos.")
     pack!
     show!)
    ;; Calling this, or setting it via REPL causes some issues...
-   (SubstanceCortex$GlobalScope/setSkin "org.pushingpixels.substance.api.skin.DustSkin")
+   (SubstanceCortex$GlobalScope/setSkin "org.pushingpixels.substance.api.skin.NebulaSkin")
    ))
 
 (log/debug "Fin")
