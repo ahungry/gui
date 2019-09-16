@@ -10,6 +10,10 @@
                  ;; [org.pushing-pixels/radiance-substance "2.5.1"]
                  [org.pushing-pixels/radiance-substance "1.0.2"]
 
+                 ;; Logging related
+                 [ch.qos.logback/logback-classic "1.2.3"]
+                 [org.clojure/tools.logging "0.5.0"]
+
                  ]
   :main ahungry.gui
   :repl-options {:init-ns ahungry.gui}

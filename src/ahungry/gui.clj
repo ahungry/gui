@@ -1,24 +1,30 @@
 (ns ahungry.gui
+  (:require
+   [clojure.tools.logging :as log])
   (:use [seesaw.core])
   (:import org.pushingpixels.substance.api.SubstanceCortex$GlobalScope)
   (:gen-class))
 
+;; TODO: Programatically set log level based on boot up or something.
+;; :trace, :debug, :info, :warn, :error, :fatal
+(log/debug "Boot")
+
 (defn laf-selector []
   (prn SubstanceCortex$GlobalScope)
   (horizontal-panel
-    :items ["Substance skin: "
-            (combobox
-              :model    (vals (SubstanceCortex$GlobalScope/getAllSkins))
-              :renderer (fn [this {:keys [value]}]
-                          (text! this (.getClassName value)))
-              :listen   [:selection (fn [e]
-                                      ; Invoke later because CB doens't like changing L&F while
-                                      ; it's doing stuff.
-                                      (invoke-later
-                                        (-> e
-                                          selection
-                                          .getClassName
-                                          SubstanceCortex$GlobalScope/setSkin)))])]))
+   :items ["Substance skin: "
+           (combobox
+            :model    (vals (SubstanceCortex$GlobalScope/getAllSkins))
+            :renderer (fn [this {:keys [value]}]
+                        (text! this (.getClassName value)))
+            :listen   [:selection (fn [e]
+                                        ; Invoke later because CB doens't like changing L&F while
+                                        ; it's doing stuff.
+                                    (invoke-later
+                                     (-> e
+                                         selection
+                                         .getClassName
+                                         SubstanceCortex$GlobalScope/setSkin)))])]))
 
 (def notes " This example shows the available Substance skins. Substance
 is a set of improved look and feels for Swing. To use it in a project,
