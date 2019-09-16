@@ -15,6 +15,14 @@
 ;; :trace, :debug, :info, :warn, :error, :fatal
 (log/debug "Boot")
 
+;; Tries to match styles to native host some
+(native!)
+
+;; (def normal-font "ARIAL-12-PLAIN")
+;; (def normal-font "ARIAL-20-PLAIN")
+(def normal-font "ARIAL-PLAIN-20")
+(def title-font "ARIAL-14-BOLD")
+
 (defn laf-selector []
   (horizontal-panel
    :items ["Substance skin: "
@@ -127,12 +135,23 @@ skins along with much less crappy looking demos.")
   (tabbed-panel :tabs [{:title "One" :content (make-canvas-panel)}
                        {:title "Two" :content (make-canvas-panel2)}]))
 
+(defn a-test [e]
+  (prn e)
+  (alert "Hello"))
+
+(defn make-menu []
+  (let [a-test (action :handler a-test :name "Test" :tip "Pop up an alert" :key "menu A")]
+    (menubar
+     :items [(menu :text "File" :items [a-test])])))
+
 (defn show
   "REPL friendly way to pop up what we're working on."
   [f]
   (invoke-later
    (->
     (frame
+     :minimum-size [640 :by 480]
+     :menubar (make-menu)
      :title "Widget"
      :content f)
     pack!
@@ -154,7 +173,7 @@ skins along with much less crappy looking demos.")
             :items [
                     :separator
                     (laf-selector)
-                    (text :multi-line? true :text notes :border 5)
+                    (text :multi-line? true :text notes :border 5 :font normal-font)
                     :separator
                     (label :text "A Label")
                     (button :text "A Button")
@@ -166,7 +185,7 @@ skins along with much less crappy looking demos.")
                                  ["First" "Second" "Third"]))
                     (scrollable (listbox :model (range 100)))])))
 
-(defn make-main-panel []
+(defn make-main []
   (tabbed-panel
    :tabs
    [
@@ -176,6 +195,27 @@ skins along with much less crappy looking demos.")
     {:title "Paint2" :content (make-canvas-panel2)}
     ]))
 
+(defn draw-a-red-x
+  "Draw a red X on a widget with the given graphics context"
+  [c g]
+  (let [w          (width c)
+        h          (height c)
+        line-style (style :foreground "#FF0000" :stroke 3 :cap :round)
+        d 5]
+    (draw g
+      (line d d (- w d) (- h d)) line-style
+      (line (- w d) d d (- h d)) line-style)))
+
+(defn make-red-x []
+  (flow-panel
+    :border 5
+    :items [
+      (label  :text "I'm a good label!" :font "ARIAL-BOLD-40" :foreground "#00AA00")
+      (label  :text "I'm a bad label!"  :font "ARIAL-BOLD-40" :paint draw-a-red-x)
+      (button :text "I'm a bad button!"  :font "ARIAL-BOLD-40" :paint draw-a-red-x)]))
+
+;; look in seesaw text_editor sample for a menu bar and probably key bindings
+
 (defn -main [& args]
   (invoke-later
    (->
@@ -183,10 +223,11 @@ skins along with much less crappy looking demos.")
      :title "Seesaw Substance/Insubstantial Example"
      :on-close :exit
      :content
-     (make-main-panel)
+     (make-main)
      )
     pack!
     show!)
+   ;; Calling this, or setting it via REPL causes some issues...
    (SubstanceCortex$GlobalScope/setSkin "org.pushingpixels.substance.api.skin.DustSkin")
    ))
 
