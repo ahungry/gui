@@ -10,6 +10,16 @@ obviously means versions of some packages will be out of date -
 usually that's fine, particularly if we weren't using some feature of
 them anyways).
 
+The main bullet-points I want to hit with this are common things that
+many GUI interfaces will tend to require, but may not cleanly fall
+into the Clojure built in facilities:
+
+- GUI rendering
+- GUI Theming/Styling
+- Networking + Serialization
+- Logging
+- Data Persistence (config file based)
+
 # Chosen packages/versions
 
 These have been tested and known to work, on a range of JRE
