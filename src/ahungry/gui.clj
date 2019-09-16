@@ -98,8 +98,12 @@
             (line-to 0 20)))
 
 (defn paint2 [c g]
-  (let [w (.getWidth c)  w2 (/ w 2)
-        h (.getHeight c) h2 (/ h 2)]
+  (let [
+        ;; w (.getWidth c)  w2 (/ w 2)
+        ;; h (.getHeight c) h2 (/ h 2)
+        w2 (rand-int 200)
+        h2 (rand-int 200)
+        ]
     (ssg/draw g
               (ssg/ellipse 0  0  w2 h2) (ssg/style :background (ssc/color 224 224 0 128))
               (ssg/ellipse 0  h2 w2 h2) (ssg/style :background (ssc/color 0 224 224 128))
@@ -133,10 +137,11 @@
              :paint paint2))
 
 ;; We can do a dynamic or REPL based flow with config!
-;; (def x (make-canvas-panel))
+;; (def x (make-canvas-panel2))
 ;; (show x)
-;; (config! x :paint 1)
-;; (config! x :paint 2)
+;; (ss/config! x :paint 1)
+;; (ss/config! x :paint 2)
+;; (while true (do (Thread/sleep 10) (ss/config! x :paint paint2)))
 
 (defn make-tabbed-pane []
   (ss/tabbed-panel :tabs [{:title "One" :content (make-canvas-panel)}
