@@ -54,7 +54,16 @@ Considered but didn't work out:
   usage matrix on their github readme for a testament to that - way
   too many red Xs)
 
-## License
+# TODO
+
+- Integrate xdg-rc package (add windows support there) to allow the
+  'default' gui view / package to easily incorporate the radiant theme
+  switcher and save user setting for this.
+- Figure out keybind to quickly cycle through active tabs (alt+N to go
+  to that tab, ctrl + tab / ctrl + shift + tab to iterate across)
+- Figure out how to add X to tab to close it out
+
+# License
 
 Copyright © 2019 Matthew Carter <m@ahungry.com>
 
