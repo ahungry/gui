@@ -20,6 +20,9 @@ into the Clojure built in facilities:
 - Logging
 - Data Persistence (config file based)
 
+![light](https://github.com/ahungry/gui/blob/master/light-gui.png)
+![dark](https://github.com/ahungry/gui/blob/master/dark-gui.png)
+
 # Chosen packages/versions
 
 These have been tested and known to work, on a range of JRE
