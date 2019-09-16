@@ -1,0 +1,3 @@
+;; -*- mode: clojure; -*-
+
+{:known-macros [[seesaw.graphics/path [move-to line-to]]]}
