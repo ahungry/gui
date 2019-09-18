@@ -257,28 +257,6 @@
 (defn e->code [e] (.getKeyCode e))
 (def e->key (comp code->key e->code))
 
-(defn handle-key-released
-  "Unset key handling facilities."
-  [e]
-  (let [key (e->key e)]
-    (when (modkey? key)
-      (swap! modkeys assoc-in [key] false))))
-
-(defn handle-key-pressed
-  "Set key handling facilities."
-  [e]
-  (let [key (e->key e)]
-    (prn e)
-    (prn key)
-    (when (modkey? key)
-      (swap! modkeys assoc-in [key] true))
-    (prn @modkeys)))
-
-(defn set-listeners! [x]
-  (ss/listen x :key-released handle-key-released)
-  (ss/listen x :key-pressed handle-key-pressed))
-
-
 (defn modchar->modkey [s]
   (case s
     "C" :ctrl
@@ -330,6 +308,27 @@
 (is-keyequal? "C-m" \m {:ctrl true :meta true}) ; false
 (is-keyequal? "M-C-m" \m {:ctrl true :meta true}) ; true
 (is-keyequal? "M-m" \m {:ctrl false :meta true}) ; true
+
+(defn handle-key-released
+  "Unset key handling facilities."
+  [e]
+  (let [key (e->key e)]
+    (when (modkey? key)
+      (swap! modkeys assoc-in [key] false))))
+
+(defn handle-key-pressed
+  "Set key handling facilities."
+  [e]
+  (let [key (e->key e)]
+    (prn e)
+    (prn key)
+    (when (modkey? key)
+      (swap! modkeys assoc-in [key] true))
+    (prn @modkeys)))
+
+(defn set-listeners! [x]
+  (ss/listen x :key-released handle-key-released)
+  (ss/listen x :key-pressed handle-key-pressed))
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
