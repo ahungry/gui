@@ -236,9 +236,11 @@
 ;; 40 - ARROW_DOWN
 
 (def modkeys (atom {:ctrl nil
-                     :alt nil
+                     :meta nil
                      :shift nil
                      :super nil}))
+
+
 
 (defn code->key
   "Receive a java.awt.event.KeyEvent key code N, turn it into the readable key."
@@ -246,7 +248,7 @@
   (case n
     16 :shift
     17 :ctrl
-    18 :alt
+    18 :meta
     524 :super
     nil))
 
@@ -275,6 +277,59 @@
 (defn set-listeners! [x]
   (ss/listen x :key-released handle-key-released)
   (ss/listen x :key-pressed handle-key-pressed))
+
+
+(defn modchar->modkey [s]
+  (case s
+    "C" :ctrl
+    "M" :meta
+    "S" :super
+    s))
+
+(defn keystring->keybind
+  "Turns something like M-C-f into #{:ctrl :meta \f}."
+  [s]
+  (->> (clojure.string/split s #"-")
+       (map modchar->modkey)
+       set))
+
+(defn active-modkeys
+  "Just pull out the active modkeys."
+  [m]
+  (->> (partition 1 m)
+       (map first)
+       (filter (fn [[_ v]] (= true v)))
+       (map first)
+       set))
+
+(defn contains-all?
+  "Ensure that set 2 (s2) contains every member listed in set 1 (s1)."
+  [x1 x2]
+  (let [s1 (set x1)
+        s2 (set x2)]
+    (= (count s1) (count (filter #(contains? s2 %) s1)))))
+
+;; TODO: Probably split keys by spaces to allow nested keys.
+(defn is-keyequal?
+  "Given an Emacs like key binding S (such as C-f (ctrl + f) or M-1 (meta
+  + 1)), see if it is equal to the code C, while considering the
+  associated modkeys states M."
+  [s c m]
+  (let [keybind (keystring->keybind s)
+        keybind-base (first (filter (complement modkey?) keybind))
+        keybind-mods (filter modkey? keybind)
+        active-modkeys (active-modkeys m)
+        all-mods-match? (contains-all? keybind-mods active-modkeys)]
+    (prn all-mods-match?)
+    (and
+     (= (count active-modkeys) (count keybind-mods))
+     all-mods-match?
+     (= keybind-base (str c)))))
+
+(is-keyequal? "m" \m {:ctrl false :meta false}) ; true
+(is-keyequal? "C-m" \m {:ctrl true :meta true}) ; false
+(is-keyequal? "M-C-m" \m {:ctrl true :meta true}) ; true
+(is-keyequal? "M-m" \m {:ctrl false :meta true}) ; true
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
