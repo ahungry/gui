@@ -251,6 +251,7 @@
     nil))
 
 (defn modkey? [kw] (contains? @modkeys kw))
+(defn e->char [e] (.getKeyChar e))
 (defn e->code [e] (.getKeyCode e))
 (def e->key (comp code->key e->code))
 
