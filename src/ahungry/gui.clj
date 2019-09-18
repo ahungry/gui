@@ -1,6 +1,7 @@
 (ns ahungry.gui
   (:require
    [seesaw.core :as ss]
+   [seesaw.keystroke :as sk]
    [seesaw.graphics :as ssg]
    [seesaw.color :as ssc]
    [seesaw.action :as ssa]
@@ -167,21 +168,18 @@
     (ss/menubar
      :items [(ss/menu :text "File" :items [a-test])])))
 
-(defn show
-  "REPL friendly way to pop up what we're working on."
-  [f]
-  (ss/invoke-later
-   (->
-    (ss/frame
-     :minimum-size [640 :by 480]
-     :menubar (make-menu)
-     :title "Widget"
-     :content f)
-    ss/pack!
-    ss/show!)))
+(defn x-action-handler [e]
+  (prn e))
+
+(def x-action (action :name "XA" :key "alt 2" :handler x-action-handler))
+
+(defn add-behaviors [root]
+  (ss/config! (select root [:.xa]) :action x-action)
+  root)
 
 (defn make-switchable-canvas []
   (ss/vertical-panel
+   :class :xa
    :items
    [(ss/canvas :id :canvas :background "#BBBBDD" :paint paint1)
     (ss/horizontal-panel :items ["Switch canvas paint function: "
@@ -191,6 +189,7 @@
 
 (defn make-laf-stuff []
   (ss/border-panel
+   ;; :class :xa
    :hgap 5 :vgap 5 :border 5
    :center (ss/vertical-panel
             :items [
@@ -215,8 +214,66 @@
     {:title "Look and Feel" :content (make-laf-stuff)}
     {:title "Switchable Canvas" :content (make-switchable-canvas)}
     {:title "Paint1" :content (make-canvas-panel)}
-    {:title "Paint2" :content (make-canvas-panel2)}
+    {:title "Paint2"
+     ;; :icon (slurp "close-icon.png")
+     :content (make-canvas-panel2)}
     ]))
+
+;; (ss/listen x :key-pressed (fn [e] (prn e)))
+;; Programatically interact with tabs via:
+;; (select x) ; Get the selection
+;; (select! x 0) ; Set the selection
+
+;; key-pressed key-released key-typed
+;; 16 - shift
+;; 18 - alt
+;; 17 - ctrl
+;; 27 - esc
+;; 524 - super left
+;; 38 - ARROW_UP
+;; 37 - ARROW_LEFT (by default moves through tab panes)
+;; 39 - ARROW_RIGHT
+;; 40 - ARROW_DOWN
+
+(def modkeys (atom {:ctrl nil
+                     :alt nil
+                     :shift nil
+                     :super nil}))
+
+(defn code->key
+  "Receive a java.awt.event.KeyEvent key code N, turn it into the readable key."
+  [n]
+  (case n
+    16 :shift
+    17 :ctrl
+    18 :alt
+    524 :super
+    nil))
+
+(defn modkey? [kw] (contains? @modkeys kw))
+(defn e->code [e] (.getKeyCode e))
+(def e->key (comp code->key e->code))
+
+(defn handle-key-released
+  "Unset key handling facilities."
+  [e]
+  (let [key (e->key e)]
+    (when (modkey? key)
+      (swap! modkeys assoc-in [key] false))))
+
+(defn handle-key-pressed
+  "Set key handling facilities."
+  [e]
+  (let [key (e->key e)]
+    (prn e)
+    (prn key)
+    (when (modkey? key)
+      (swap! modkeys assoc-in [key] true))
+    (prn @modkeys)))
+
+(defn set-listeners! [x]
+  (ss/listen x :key-released handle-key-released)
+  (ss/listen x :key-pressed handle-key-pressed))
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
@@ -238,6 +295,22 @@
            (ss/button :text "I'm a bad button!"  :font "ARIAL-BOLD-40" :paint draw-a-red-x)]))
 
 ;; look in seesaw text_editor sample for a menu bar and probably key bindings
+(defn show
+  "REPL friendly way to pop up what we're working on."
+  [f]
+  (ss/invoke-later
+   (->
+    (ss/frame
+     :minimum-size [640 :by 480]
+     :menubar (make-menu)
+     :title "Widget"
+     :content f)
+    ;; add-behaviors
+    ss/pack!
+    ss/show!)
+   (set-listeners! f)))
+
+(def x (make-main))
 
 (defn -main [& args]
   (ss/invoke-later
