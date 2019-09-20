@@ -164,6 +164,9 @@
   (prn e)
   (ss/alert "Hello"))
 
+;; NOTE: hmm
+;; Hmm, it may be easiest to do all "top level" bindings in the menu area.
+;; Otherwise, it seems like certain elements can eat all the custom keybinds/listeners.
 (defn make-menu []
   (let [a-test (ssa/action :handler a-test :name "Test" :tip "Pop up an alert" :key "menu A")]
     (ss/menubar
@@ -225,9 +228,13 @@
 ;; (select x) ; Get the selection
 ;; (select! x 0) ; Set the selection
 
-(defn set-listeners! [x]
+(defn set-listeners!
+  "Uses Emacs style key binding maps to bind user button presses to
+  functions to invoke on key pressed events.  We would probably want
+  to update this to handle sending args to the events in some way also."
+  [x]
   (ss/listen x :key-released keys/handle-key-released)
-  (ss/listen x :key-pressed keys/handle-key-pressed))
+  (ss/listen x :key-pressed (keys/handle-key-pressed keys/global-keymap)))
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
@@ -252,6 +259,7 @@
 (defn show
   "REPL friendly way to pop up what we're working on."
   [f]
+  (keys/init!)
   (ss/invoke-later
    (->
     (ss/frame

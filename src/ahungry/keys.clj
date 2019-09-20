@@ -18,10 +18,15 @@
 ;; 39 - ARROW_RIGHT
 ;; 40 - ARROW_DOWN
 
-(def modkeys (atom {:ctrl nil
+(def *modkeys (atom {:ctrl nil
                      :meta nil
                      :shift nil
                      :super nil}))
+
+(defn init!
+  "Resets atom state."
+  []
+  (reset! *modkeys {:ctrl nil :meta nil :shift nil :super nil}))
 
 (defn code->key
   "Receive a java.awt.event.KeyEvent key code N, turn it into the readable key."
@@ -35,10 +40,10 @@
     32 :space
     (char n)))
 
-(defn modkey? [kw] (contains? @modkeys kw))
+(defn modkey? [kw] (contains? @*modkeys kw))
 (defn e->char [e] (.getKeyChar e))
 (defn e->code [e]
-  (log/debug "Translating event to code char: " (.getKeyCode e))
+  ;; (log/debug "Translating event to code char: " (.getKeyCode e))
   (.getKeyCode e))
 (def e->key (comp code->key e->code))
 
@@ -64,6 +69,11 @@
        (map first)
        set))
 
+(defn case-insensitive-eq
+  "Compare strings S1 and S2 in a case insensitive manner."
+  [s1 s2]
+  (= (.toLowerCase s1) (.toLowerCase s2)))
+
 ;; TODO: Probably split keys by spaces to allow nested keys.
 (defn is-keyequal?
   "Given an Emacs like key binding S (such as C-f (ctrl + f) or M-1 (meta
@@ -78,15 +88,15 @@
     (and
      (= (count active-modkeys) (count keybind-mods))
      all-mods-match?
-     (= keybind-base (str c)))))
+     (case-insensitive-eq keybind-base (str c)))))
 
 (defn handle-key-released
   "Unset key handling facilities."
   [e]
   (let [key (e->key e)]
     (when (modkey? key)
-      (log/debug "Modkey is releaed, unsetting it.")
-      (swap! modkeys assoc-in [key] false))))
+      ;; (log/debug "Modkey is released, unsetting it.")
+      (swap! *modkeys assoc-in [key] false))))
 
 (defn foo [] (log/info "Foo was called."))
 (defn bar [] (log/info "Bar was called."))
@@ -100,9 +110,7 @@
   [c state]
   (fn [col]
     (let [keybind (first col)]
-      (log/debug "filter-by-is-keyequal?" c state keybind)
-      (is-keyequal? keybind c state)
-      )))
+      (is-keyequal? keybind c state))))
 
 (defn dispatch-get-fns
   "Receives a map M of keybinds, a char C, and works against active STATE to find
@@ -110,13 +118,15 @@
   [m c state]
   (->> (into [] m)
        (filter (filter-by-is-keyequal? c state))
-       (map second)))
+       (map second)
+       doall))
 
 (defn dispatch
   "Receives a map M of keybinds, a char C, and works against active STATE to find
   which keybind is appropriate to return a function for and calls them."
   [m c state]
   (let [fs (dispatch-get-fns m c state)]
+    ;; (log/debug "Dispatch came up with this list of functions to run: " fs)
     fs))
 
 (defn handle-key-pressed
@@ -126,9 +136,11 @@
   [m]
   (fn [e]
     (let [key (e->key e)]
-      (log/debug "Key press event received: " e)
-      (log/debug "Translated e->key to: " key)
+      ;; (log/debug "Key press event received: " e)
+      ;; (log/debug "Translated e->key to: " key)
       (when (modkey? key)
-        (log/debug "Modkey is held down, setting it.")
-        (swap! modkeys assoc-in [key] true))
-      (dispatch m key))))
+        ;; (log/debug "Modkey is held down, setting it.")
+        (swap! *modkeys assoc-in [key] true))
+      (->> (dispatch m key @*modkeys)
+           (map #(%))
+           doall))))
