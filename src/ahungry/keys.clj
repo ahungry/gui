@@ -109,7 +109,8 @@
   which keybind is appropriate to return a function for."
   [m c state]
   (->> (into [] m)
-       (filter (filter-by-is-keyequal? c state))))
+       (filter (filter-by-is-keyequal? c state))
+       (map second)))
 
 (defn dispatch
   "Receives a map M of keybinds, a char C, and works against active STATE to find

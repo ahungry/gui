@@ -38,3 +38,15 @@
     (is (= false (is-keyequal? "C-m" \m {:ctrl true :meta true})))
     (is (= true (is-keyequal? "C-M-b" \b {:ctrl true :meta true})))
     (is (= true (is-keyequal? "M-m" \m {:ctrl false :meta true})))))
+
+(deftest dispatch-get-fns-test
+  (testing "That functions or values we expect to return do so."
+    (let [keymap {"a" 42
+                  "C-b" 52
+                  "C-M-x" 90}]
+      (is (= 42 (first (dispatch-get-fns keymap \a {:ctrl nil}))))
+      (is (= 52 (first (dispatch-get-fns keymap \b {:ctrl true}))))
+      (is (= 90 (first (dispatch-get-fns keymap \x {:ctrl true :meta true}))))
+      (is (= '() (dispatch-get-fns keymap \z {})))
+      )
+    ))
