@@ -10,7 +10,7 @@
     (is (= :ctrl (code->key 17)))
     (is (= :meta (code->key 18)))
     (is (= :super (code->key 524)))
-    (is (= nil (code->key -1)))))
+    (is (= \A (code->key 65)))))
 
 (deftest modkey?-test
   (testing "Modkeys should show up as such."

@@ -264,7 +264,11 @@
     ss/show!)
    (set-listeners! f)))
 
+;; Just debug WIP stuff
 (def x (make-main))
+(set-listeners! x)
+;; Ensure we don't eat up the tab key presses
+(.setFocusTraversalKeysEnabled x false)
 
 (defn -main [& args]
   (ss/invoke-later

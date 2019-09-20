@@ -31,11 +31,15 @@
     17 :ctrl
     18 :meta
     524 :super
-    nil))
+    9 :tab
+    32 :space
+    (char n)))
 
 (defn modkey? [kw] (contains? @modkeys kw))
 (defn e->char [e] (.getKeyChar e))
-(defn e->code [e] (.getKeyCode e))
+(defn e->code [e]
+  (log/debug "Translating event to code char: " (.getKeyCode e))
+  (.getKeyCode e))
 (def e->key (comp code->key e->code))
 
 (defn modchar->modkey [s]
@@ -85,12 +89,46 @@
       (log/debug "Modkey is releaed, unsetting it.")
       (swap! modkeys assoc-in [key] false))))
 
+(defn foo [] (log/info "Foo was called."))
+(defn bar [] (log/info "Bar was called."))
+
+(def global-keymap
+  {"a" #'foo
+   "C-b" #'bar})
+
+(defn filter-by-is-keyequal?
+  "Expects col to be a col of tuples, where the first is the binding."
+  [c state]
+  (fn [col]
+    (let [keybind (first col)]
+      (log/debug "filter-by-is-keyequal?" c state keybind)
+      (is-keyequal? keybind c state)
+      )))
+
+(defn dispatch-get-fns
+  "Receives a map M of keybinds, a char C, and works against active STATE to find
+  which keybind is appropriate to return a function for."
+  [m c state]
+  (->> (into [] m)
+       (filter (filter-by-is-keyequal? c state))))
+
+(defn dispatch
+  "Receives a map M of keybinds, a char C, and works against active STATE to find
+  which keybind is appropriate to return a function for and calls them."
+  [m c state]
+  (let [fs (dispatch-get-fns m c state)]
+    fs))
+
 (defn handle-key-pressed
-  "Set key handling facilities."
-  [e]
-  (let [key (e->key e)]
-    (log/debug "Key press event received: " e)
-    (log/debug "Translated e->key to: " key)
-    (when (modkey? key)
-      (log/debug "Modkey is held down, setting it.")
-      (swap! modkeys assoc-in [key] true))))
+  "Set key handling facilities.  Receives a map M, which contains binds
+  of translated keys to functions to run - returns a function to
+  receive events as such."
+  [m]
+  (fn [e]
+    (let [key (e->key e)]
+      (log/debug "Key press event received: " e)
+      (log/debug "Translated e->key to: " key)
+      (when (modkey? key)
+        (log/debug "Modkey is held down, setting it.")
+        (swap! modkeys assoc-in [key] true))
+      (dispatch m key))))
