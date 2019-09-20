@@ -292,6 +292,8 @@
 ;; Ensure we don't eat up the tab key presses
 (.setFocusTraversalKeysEnabled x false)
 
+(defn set-root! [x] (reset! *root x) x)
+
 (defn -main [& args]
   (ss/invoke-later
    (->
@@ -301,7 +303,7 @@
      :menubar (make-menu)
      :on-close :exit
      :content
-     (make-main)
+     (-> (make-main) set-root!)
      )
     ss/pack!
     ss/show!)
