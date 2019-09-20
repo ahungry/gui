@@ -46,14 +46,14 @@
     s))
 
 (defn keystring->keybind
-  "Turns something like M-C-f into #{:ctrl :meta \f}."
+  "Turns something like C-M-f into #{:ctrl :meta \"f\"}."
   [s]
   (->> (clojure.string/split s #"-")
        (map modchar->modkey)
        set))
 
 (defn active-modkeys
-  "Just pull out the active modkeys."
+  "Just pull out/filter the active modkeys and return a set of them."
   [m]
   (->> (partition 1 m)
        (map first)
@@ -72,30 +72,25 @@
         keybind-mods (filter modkey? keybind)
         active-modkeys (active-modkeys m)
         all-mods-match? (util/contains-all? keybind-mods active-modkeys)]
-    (prn all-mods-match?)
     (and
      (= (count active-modkeys) (count keybind-mods))
      all-mods-match?
      (= keybind-base (str c)))))
-
-(is-keyequal? "m" \m {:ctrl false :meta false}) ; true
-(is-keyequal? "C-m" \m {:ctrl true :meta true}) ; false
-(is-keyequal? "M-C-m" \m {:ctrl true :meta true}) ; true
-(is-keyequal? "M-m" \m {:ctrl false :meta true}) ; true
 
 (defn handle-key-released
   "Unset key handling facilities."
   [e]
   (let [key (e->key e)]
     (when (modkey? key)
+      (log/debug "Modkey is releaed, unsetting it.")
       (swap! modkeys assoc-in [key] false))))
 
 (defn handle-key-pressed
   "Set key handling facilities."
   [e]
   (let [key (e->key e)]
-    (prn e)
-    (prn key)
+    (log/debug "Key press event received: " e)
+    (log/debug "Translated e->key to: " key)
     (when (modkey? key)
-      (swap! modkeys assoc-in [key] true))
-    (prn @modkeys)))
+      (log/debug "Modkey is held down, setting it.")
+      (swap! modkeys assoc-in [key] true))))

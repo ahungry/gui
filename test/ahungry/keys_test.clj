@@ -23,3 +23,18 @@
     (is (= :meta (modchar->modkey "M")))
     (is (= :super (modchar->modkey "S")))
     (is (= "x" (modchar->modkey "x")))))
+
+(deftest keystring->keybind-test
+  (testing "We can do the conversions."
+    (is (= #{:ctrl :meta "f"} (keystring->keybind "C-M-f")))))
+
+(deftest active-modkeys-test
+  (testing "We can extract active keys."
+    (is (= #{:ctrl :meta} (active-modkeys {:ctrl true :meta true :super nil})))))
+
+(deftest is-keyequal?-test
+  (testing "The equality comparisons hold up."
+    (is (= true (is-keyequal? "m" \m {:ctrl false :meta false})))
+    (is (= false (is-keyequal? "C-m" \m {:ctrl true :meta true})))
+    (is (= true (is-keyequal? "C-M-b" \b {:ctrl true :meta true})))
+    (is (= true (is-keyequal? "M-m" \m {:ctrl false :meta true})))))
