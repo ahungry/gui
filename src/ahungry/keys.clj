@@ -59,8 +59,7 @@
 (defn active-modkeys
   "Just pull out/filter the active modkeys and return a set of them."
   [m]
-  (->> (partition 1 m)
-       (map first)
+  (->> (into [] m)
        (filter (fn [[_ v]] (= true v)))
        (map first)
        set))
