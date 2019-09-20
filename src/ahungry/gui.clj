@@ -164,13 +164,26 @@
   (prn e)
   (ss/alert "Hello"))
 
+;; Set up a root we can ref later as an atom.
+(def *root (atom nil))
+
 ;; NOTE: hmm
 ;; Hmm, it may be easiest to do all "top level" bindings in the menu area.
 ;; Otherwise, it seems like certain elements can eat all the custom keybinds/listeners.
 (defn make-menu []
-  (let [a-test (ssa/action :handler a-test :name "Test" :tip "Pop up an alert" :key "menu A")]
+  (let [a-test (ssa/action :handler a-test :name "Test" :tip "Pop up an alert" :key "menu A")
+        tab1 (ssa/action :handler (fn [_e] (ss/selection! @*root 1))
+                         :name "Select Tab 1"
+                         :tip "Jump to tab 1."
+                         :key "menu 1")
+        tab2 (ssa/action :handler (fn [_e] (ss/selection! @*root 2))
+                         :name "Select Tab 1"
+                         :tip "Jump to tab 1."
+                         :key "menu 2")
+        ]
     (ss/menubar
-     :items [(ss/menu :text "File" :items [a-test])])))
+     :items [(ss/menu :text "File" :items [a-test])
+             (ss/menu :text "Tabs" :items [tab1 tab2])])))
 
 (defn x-action-handler [e]
   (prn e))
@@ -225,8 +238,8 @@
 
 ;; (ss/listen x :key-pressed (fn [e] (prn e)))
 ;; Programatically interact with tabs via:
-;; (select x) ; Get the selection
-;; (select! x 0) ; Set the selection
+;; (ss/selection x) ; Get the selection
+;; (ss/selection! x 0) ; Set the selection
 
 (defn set-listeners!
   "Uses Emacs style key binding maps to bind user button presses to
@@ -274,6 +287,7 @@
 
 ;; Just debug WIP stuff
 (def x (make-main))
+(reset! *root x)
 (set-listeners! x)
 ;; Ensure we don't eat up the tab key presses
 (.setFocusTraversalKeysEnabled x false)
