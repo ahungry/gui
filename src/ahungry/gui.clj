@@ -25,6 +25,8 @@
 ;; Tries to match styles to native host some
 (ss/native!)
 
+(set! *warn-on-reflection* false)
+
 ;; (def normal-font "ARIAL-12-PLAIN")
 ;; (def normal-font "ARIAL-20-PLAIN")
 (def normal-font "ARIAL-PLAIN-20")
@@ -85,6 +87,13 @@
       (.fillRect (/ w 2) (/ h 2) (/ w 2) (/ h 2))
       (.setColor (ssc/color 0 0 0))
       (.drawString "Hello. This is a canvas example" 20 20))))
+
+(defn get-image [filename]
+  (javax.imageio.ImageIO/read (clojure.java.io/file filename)))
+
+(defn paint-image [canvas graphics]
+  (let [img (get-image "dark-gui.png")]
+    (.drawImage graphics img nil nil)))
 
 (def text-style (ssg/style :foreground (ssc/color 0 0 0)
                            :font "ARIAL-BOLD-24"))
@@ -209,10 +218,20 @@
    ;; :class :xa
    :hgap 5 :vgap 5 :border 5
    :center (ss/vertical-panel
+            :paint paint-image
             :items [
                     :separator
                     (laf-selector)
-                    (ss/text :multi-line? true :text notes :border 5 :font normal-font)
+                    (ss/text :multi-line? true
+                             :text notes
+                             :border 5
+                             :font normal-font
+                             :opaque? false
+                             ;; Yes! we can paint custom.
+                             ;; Would it work with image?
+                             ;; Well, almost - the painted image covers up the text...
+                             ;; :paint paint-image
+                             )
                     :separator
                     (ss/label :text "A Label")
                     (ss/button :text "A Button")
