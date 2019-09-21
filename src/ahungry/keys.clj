@@ -137,9 +137,9 @@
   (fn [e]
     (let [key (e->key e)]
       ;; (log/debug "Key press event received: " e)
-      ;; (log/debug "Translated e->key to: " key)
+      (log/debug "Translated e->key to: " key)
       (when (modkey? key)
-        ;; (log/debug "Modkey is held down, setting it.")
+        (log/debug "Modkey is held down, setting it.")
         (swap! *modkeys assoc-in [key] true))
       (->> (dispatch m key @*modkeys)
            (map #(%))

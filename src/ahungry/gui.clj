@@ -241,13 +241,39 @@
 ;; (ss/selection x) ; Get the selection
 ;; (ss/selection! x 0) ; Set the selection
 
-(defn set-listeners!
+(defn xset-listeners!
   "Uses Emacs style key binding maps to bind user button presses to
   functions to invoke on key pressed events.  We would probably want
   to update this to handle sending args to the events in some way also."
   [x]
   (ss/listen x :key-released keys/handle-key-released)
   (ss/listen x :key-pressed (keys/handle-key-pressed keys/global-keymap)))
+
+(defn dispatch-event [^java.awt.event.KeyEvent e]
+  (try
+    (let [id (.getID e)]
+      (cond
+        (= id java.awt.event.KeyEvent/KEY_PRESSED)
+        ((keys/handle-key-pressed keys/global-keymap) e)
+
+        (= id java.awt.event.KeyEvent/KEY_RELEASED)
+        (keys/handle-key-released e)
+
+        :else
+        nil
+        ;; (prn "Some unmapped key event...")
+        ))
+    (catch Exception e (prn e))))
+
+(defn set-listeners!
+  [x]
+  (let [manager (java.awt.KeyboardFocusManager/getCurrentKeyboardFocusManager)
+        dispatcher (reify java.awt.KeyEventDispatcher
+                     (dispatchKeyEvent [this e]
+                       (dispatch-event e)
+                       false))]
+    (doto manager
+      (.addKeyEventDispatcher dispatcher))))
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
@@ -288,7 +314,7 @@
 ;; Just debug WIP stuff
 (def x (make-main))
 (reset! *root x)
-(set-listeners! x)
+;; (set-listeners! x)
 ;; Ensure we don't eat up the tab key presses
 (.setFocusTraversalKeysEnabled x false)
 
