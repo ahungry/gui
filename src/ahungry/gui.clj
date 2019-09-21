@@ -240,7 +240,7 @@
                              :border 5
                              :font normal-font
                              :opaque? false
-                             :background "#ffffff"
+                             :foreground "#ffffff"
                              ;; Yes! we can paint custom.
                              ;; Would it work with image?
                              ;; Well, almost - the painted image covers up the text...
@@ -309,7 +309,7 @@
     (doto manager
       (.addKeyEventDispatcher dispatcher))))
 
-(set-listeners!)
+(defonce listeners (set-listeners!))
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
