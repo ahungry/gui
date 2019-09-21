@@ -67,6 +67,24 @@ Considered but didn't work out:
   usage matrix on their github readme for a testament to that - way
   too many red Xs)
 
+## Notes - Setting up profile to test different java version
+
+On ArchLinux you can use `sudo archlinux-java set java-8-openjdk/jre`
+or `sudo archlinux-java set java-12-openjdk` (Ubuntu has an update
+alternatives approach).
+
+On Windows, you can adjust in your ~/.lein/profile.clj by adding
+something like this:
+
+```clojure
+{:user
+  {
+    :java-cmd "C:\\Program\ Files\\Java\\jdk1.8.0_202\\bin\\java.exe "
+    ;; :java-cmd "C:\\Users\\IEUser\\scoop\\apps\\zulu12\\current\\bin\\java.exe"
+  }
+}
+```
+
 # TODO
 
 - Integrate xdg-rc package (add windows support there) to allow the
