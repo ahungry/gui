@@ -91,9 +91,22 @@
 (defn get-image [filename]
   (javax.imageio.ImageIO/read (clojure.java.io/file filename)))
 
-(defn paint-image [canvas graphics]
-  (let [img (get-image "dark-gui.png")]
-    (.drawImage graphics img nil nil)))
+(defn xy-looper
+  "Loop across a grid of W width and H height in steps of X and Y, applying f(x y) each time."
+  [w h x y f]
+  (loop [ix 0]
+    (loop [iy 0]
+      (f (* x ix) (* y iy))
+      (when (< (* y iy) h) (recur (inc iy))))
+    (when (< (* x ix) w) (recur (inc ix)))))
+
+(defn paint-image [c graphics]
+  (let [w (.getWidth c)
+        h (.getHeight c)
+        x 256    ; This should be dynamic from image, not hardcoded...
+        y 256    ; This should be dynamic from image, not hardcoded...
+        img (get-image "main-bg.jpg")]
+    (xy-looper w h x y (fn [x y] (.drawImage graphics img nil x y)))))
 
 (def text-style (ssg/style :foreground (ssc/color 0 0 0)
                            :font "ARIAL-BOLD-24"))
@@ -227,6 +240,7 @@
                              :border 5
                              :font normal-font
                              :opaque? false
+                             :background "#ffffff"
                              ;; Yes! we can paint custom.
                              ;; Would it work with image?
                              ;; Well, almost - the painted image covers up the text...
@@ -285,7 +299,8 @@
     (catch Exception e (prn e))))
 
 (defn set-listeners!
-  [x]
+  "Global listener handling irregardless of what is focused."
+  []
   (let [manager (java.awt.KeyboardFocusManager/getCurrentKeyboardFocusManager)
         dispatcher (reify java.awt.KeyEventDispatcher
                      (dispatchKeyEvent [this e]
@@ -293,6 +308,8 @@
                        false))]
     (doto manager
       (.addKeyEventDispatcher dispatcher))))
+
+(set-listeners!)
 
 (defn draw-a-red-x
   "Draw a red X on a widget with the given graphics context"
@@ -328,7 +345,8 @@
     ;; add-behaviors
     ss/pack!
     ss/show!)
-   (set-listeners! f)))
+   ;; (set-listeners! f)
+   ))
 
 ;; Just debug WIP stuff
 (def x (make-main))
